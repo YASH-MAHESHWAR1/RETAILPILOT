@@ -8,22 +8,6 @@ def inject_custom_css():
     /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Global Variables */
-    :root {
-        --primary-color: #FF6B35;
-        --secondary-color: #2A9D8F;
-        --accent-color: #E76F51;
-        --background-dark: #0E1117;
-        --background-secondary: #1E2936;
-        --background-card: #262730;
-        --text-primary: #FFFFFF;
-        --text-secondary: #B8BCC8;
-        --border-color: #2A2D3A;
-        --success-color: #4CAF50;
-        --warning-color: #FF9800;
-        --error-color: #F44336;
-        --info-color: #2196F3;
-    }
     
     /* Main App Styling */
     .main .block-container {
@@ -42,22 +26,24 @@ def inject_custom_css():
         font-family: 'Inter', sans-serif;
         font-size: 2.5rem;
         font-weight: 700;
-        color: var(--text-primary);
+        color: #FF6B35; /* fallback solid color */
         text-align: center;
         margin-bottom: 2rem;
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        /* Optional: comment out gradient if Hugging Face doesn't support text clipping properly */
+        /* background: linear-gradient(135deg, #FF6B35, #2A9D8F); 
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
+        background-clip: text; */
     }
+    
     
     .section-header {
         font-family: 'Inter', sans-serif;
         font-size: 1.8rem;
         font-weight: 600;
-        color: var(--text-primary);
+        color: #FFFFFF;
         margin-bottom: 1.5rem;
-        border-bottom: 2px solid var(--primary-color);
+        border-bottom: 2px solid #FF6B35;
         padding-bottom: 0.5rem;
     }
     
@@ -65,18 +51,18 @@ def inject_custom_css():
         font-family: 'Inter', sans-serif;
         font-size: 1.3rem;
         font-weight: 500;
-        color: var(--text-secondary);
+        color: #B8BCC8;
         margin-bottom: 1rem;
     }
     
     /* Sidebar Styling */
     .css-1d391kg {
-        background-color: var(--background-secondary);
-        border-right: 1px solid var(--border-color);
+        background-color: #1E2936;
+        border-right: 1px solid #2A2D3A;
     }
     
     .sidebar .sidebar-content {
-        background-color: var(--background-secondary);
+        background-color: #1E2936;
     }
     
     /* Remove sidebar container boxes */
@@ -100,10 +86,10 @@ def inject_custom_css():
     .nav-title {
         font-size: 1.6rem;
         font-weight: 700;
-        color: var(--text-primary);
+        color: #FFFFFF;
         margin: 1.5rem 0 1rem 0;
         padding: 0.75rem 0;
-        border-bottom: 3px solid var(--primary-color);
+        border-bottom: 3px solid #FF6B35;
         text-transform: uppercase;
         letter-spacing: 1px;
     }
@@ -113,20 +99,20 @@ def inject_custom_css():
         padding: 0.8rem 1rem;
         margin: 0.5rem 0;
         border-radius: 8px;
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         transition: all 0.3s ease;
     }
     
     .nav-item:hover {
-        background-color: var(--primary-color);
+        background-color: #FF6B35;
         transform: translateX(5px);
     }
     
     /* Metric Cards */
     .metric-card {
-        background: linear-gradient(135deg, var(--background-card), var(--background-secondary));
-        border: 1px solid var(--border-color);
+        background: linear-gradient(135deg, #262730, #1E2936);
+        border: 1px solid #2A2D3A;
         border-radius: 12px;
         padding: 1.5rem;
         margin: 1rem 0;
@@ -145,7 +131,7 @@ def inject_custom_css():
         font-family: 'Inter', sans-serif;
         font-size: 2rem;
         font-weight: 700;
-        color: var(--primary-color);
+        color: #FF6B35;
         margin-bottom: 0.5rem;
         word-wrap: break-word;
         line-height: 1.2;
@@ -155,7 +141,7 @@ def inject_custom_css():
         font-family: 'Inter', sans-serif;
         font-size: 0.9rem;
         font-weight: 500;
-        color: var(--text-secondary);
+        color: #B8BCC8;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         word-wrap: break-word;
@@ -169,11 +155,11 @@ def inject_custom_css():
     }
     
     .metric-delta.positive {
-        color: var(--success-color);
+        color: #4CAF50;
     }
     
     .metric-delta.negative {
-        color: var(--error-color);
+        color: #F44336;
     }
     
     /* Status Indicators */
@@ -188,29 +174,29 @@ def inject_custom_css():
     }
     
     .status-fully-stocked {
-        background-color: var(--success-color);
+        background-color: #4CAF50;
         color: white;
     }
     
     .status-mild {
-        background-color: var(--info-color);
+        background-color: #2196F3;
         color: white;
     }
     
     .status-moderate {
-        background-color: var(--warning-color);
+        background-color: #FF9800;
         color: white;
     }
     
     .status-severe {
-        background-color: var(--error-color);
+        background-color: #F44336;
         color: white;
     }
     
     /* Chart Container */
     .chart-container {
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         border-radius: 12px;
         padding: 1.5rem;
         margin: 1rem 0;
@@ -219,28 +205,28 @@ def inject_custom_css():
     
     /* Data Table Styling */
     .dataframe {
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         border-radius: 8px;
         overflow: hidden;
     }
     
     .dataframe th {
-        background-color: var(--background-secondary);
-        color: var(--text-primary);
+        background-color: #1E2936;
+        color: #FFFFFF;
         font-weight: 600;
         padding: 1rem;
-        border-bottom: 2px solid var(--primary-color);
+        border-bottom: 2px solid #FF6B35;
     }
     
     .dataframe td {
         padding: 0.8rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-secondary);
+        border-bottom: 1px solid #2A2D3A;
+        color: #B8BCC8;
     }
     
     .dataframe tr:hover {
-        background-color: var(--background-secondary);
+        background-color: #1E2936;
     }
     
     /* Buttons */
@@ -250,7 +236,7 @@ def inject_custom_css():
     }
     
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        background: linear-gradient(135deg, #FF6B35, #E76F51);
         color: white;
         border: none;
         border-radius: 8px;
@@ -270,8 +256,8 @@ def inject_custom_css():
     
     /* Select Boxes */
     .stSelectbox > div > div {
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         border-radius: 8px;
     }
     
@@ -284,8 +270,8 @@ def inject_custom_css():
     }
     
     .loading-spinner {
-        border: 4px solid var(--border-color);
-        border-top: 4px solid var(--primary-color);
+        border: 4px solid #2A2D3A;
+        border-top: 4px solid #FF6B35;
         border-radius: 50%;
         width: 40px;
         height: 40px;
@@ -307,41 +293,41 @@ def inject_custom_css():
     
     .alert-success {
         background-color: rgba(76, 175, 80, 0.1);
-        border-left-color: var(--success-color);
-        color: var(--success-color);
+        border-left-color: #4CAF50;
+        color: #4CAF50;
     }
     
     .alert-warning {
         background-color: rgba(255, 152, 0, 0.1);
-        border-left-color: var(--warning-color);
-        color: var(--warning-color);
+        border-left-color: #FF9800;
+        color: #FF9800;
     }
     
     .alert-error {
         background-color: rgba(244, 67, 54, 0.1);
-        border-left-color: var(--error-color);
-        color: var(--error-color);
+        border-left-color: #F44336;
+        color: #F44336;
     }
     
     .alert-info {
         background-color: rgba(33, 150, 243, 0.1);
-        border-left-color: var(--info-color);
-        color: var(--info-color);
+        border-left-color: #2196F3;
+        color: #2196F3;
     }
     
     /* Welcome Section */
     .welcome-container {
         text-align: center;
         padding: 3rem 2rem;
-        background: linear-gradient(135deg, var(--background-card), var(--background-secondary));
+        background: linear-gradient(135deg, #262730, #1E2936);
         border-radius: 16px;
         margin: 2rem 0;
-        border: 1px solid var(--border-color);
+        border: 1px solid #2A2D3A;
     }
     
     .welcome-icon {
         font-size: 4rem;
-        color: var(--primary-color);
+        color: #FF6B35;
         margin-bottom: 1rem;
     }
     
@@ -353,8 +339,8 @@ def inject_custom_css():
     }
     
     .feature-card {
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         border-radius: 12px;
         padding: 2rem;
         text-align: center;
@@ -367,14 +353,14 @@ def inject_custom_css():
     
     .feature-icon {
         font-size: 2.5rem;
-        color: var(--secondary-color);
+        color: #2A9D8F;
         margin-bottom: 1rem;
     }
     
     /* Filter Section */
     .filter-section {
-        background-color: var(--background-card);
-        border: 1px solid var(--border-color);
+        background-color: #262730;
+        border: 1px solid #2A2D3A;
         border-radius: 12px;
         padding: 1.5rem;
         margin: 1rem 0;
@@ -383,7 +369,7 @@ def inject_custom_css():
     .filter-title {
         font-size: 1.1rem;
         font-weight: 600;
-        color: var(--text-primary);
+        color: #FFFFFF;
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
