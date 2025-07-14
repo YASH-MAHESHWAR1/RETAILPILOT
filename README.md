@@ -112,7 +112,7 @@ Because of its **large size (~2GB+)**, this project uses **preprocessed Parquet 
 - Final models were selected balancing performance and size (some models >2GB were excluded).
 - ML-only approach was intentional to maintain model interpretability and compatibility within file size constraints and make this project ML oriented.
 - Hyperparameter tuning was conducted through manual sweeps and performance comparison.
-
+- ✅ **Note**: All predictions are generated using a **dedicated test dataset (`test_processed.parquet`)** that was kept **separate from the training data**, ensuring model generalization and reliable performance evaluation.
 ---
 
 ## 📊 Visualization Features
