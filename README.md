@@ -2,6 +2,8 @@
 
 ## 🧠 Overview
 
+🔗 **Live Demo**: [Try the App Here](https://huggingface.co/spaces/Yash-M1775/RETAILPILOT)
+
 This is a an ML-powered **Smart Inventory Management** application designed for retail businesses to optimize their inventory using predictive analytics. It supports multi-task predictions including:
 
 - 🧾 **Sales Forecasting**  
