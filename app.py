@@ -377,18 +377,28 @@ elif section == "🔮 Predictions":
 
                 # Add severity indicators for classification tasks
                 if "Severity" in df_result.columns or "True Severity" in df_result.columns:
-                    df_display = df_result.copy()
-                    # Apply status indicators only for columns that hold severity class
-                    if 'True Severity' in df_display.columns:
-                        df_display['True Severity'] = df_display['True Severity'].apply(
-                            lambda x: create_status_indicator({0: "Fully Stocked", 1: "Mild", 2: "Moderate", 3: "Severe"}.get(x, "Unknown"))
-                        )
-                    if 'Predicted Severity' in df_display.columns:
-                        df_display['Predicted Severity'] = df_display['Predicted Severity'].apply(
-                            lambda x: create_status_indicator({0: "Fully Stocked", 1: "Mild", 2: "Moderate", 3: "Severe"}.get(x, "Unknown"))
-                        )
-                    st.markdown(df_display.to_html(escape=False), unsafe_allow_html=True)
+                    # Create a copy to modify for display
+                    df_display_for_st_dataframe = df_result.copy()
+
+                    # Define the mapping for severity classes to descriptive strings
+                    severity_class_to_label = {
+                        0: "Fully Stocked",
+                        1: "Mild",
+                        2: "Moderate",
+                        3: "Severe"
+                    }
+
+                    # Convert numeric severity columns to their descriptive labels
+                    # These labels will be displayed as plain text in st.dataframe, enabling scrolling
+                    if 'True Severity' in df_display_for_st_dataframe.columns:
+                        df_display_for_st_dataframe['True Severity'] = df_display_for_st_dataframe['True Severity'].map(severity_class_to_label).fillna("Unknown")
+                    if 'Predicted Severity' in df_display_for_st_dataframe.columns:
+                        df_display_for_st_dataframe['Predicted Severity'] = df_display_for_st_dataframe['Predicted Severity'].map(severity_class_to_label).fillna("Unknown")
+
+                    # Display using st.dataframe which handles scrolling
+                    st.dataframe(df_display_for_st_dataframe, use_container_width=True)
                 else:
+                    # For other prediction tasks (e.g., sales volume, stock-out hours), use st.dataframe directly
                     st.dataframe(df_result, use_container_width=True)
         else:
             st.markdown(create_alert("No predictions available for the selected filters.", "warning"), unsafe_allow_html=True)
