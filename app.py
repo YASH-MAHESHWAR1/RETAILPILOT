@@ -1,4 +1,3 @@
-
 import streamlit as st
 from utils.load_models import load_model
 from utils.config import feature_cols
@@ -10,6 +9,14 @@ import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+# --- Helper function for consistent numeric formatting ---
+def format_display_value(value, decimals=4):
+    """Formats a numeric value to a specified number of decimal places,
+    otherwise returns the value as a string."""
+    if isinstance(value, (int, float)):
+        return f"{value:.{decimals}f}"
+    return str(value)
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -119,18 +126,22 @@ if section == "🏠 Dashboard":
     
     with col1:
         total_sales = train_df['sale_amount'].sum()
-        st.markdown(create_metric_card("Total Sales Revenue", f"{total_sales:,.2f}"), unsafe_allow_html=True)
+        # Changed to 4 decimal places
+        st.markdown(create_metric_card("Total Sales Revenue", f"{total_sales:,.4f}"), unsafe_allow_html=True)
     
     with col2:
         avg_stock_hours = train_df['stock_hour6_22_cnt'].mean()
-        st.markdown(create_metric_card("Avg Stock-Out Hours", f"{avg_stock_hours:.1f}"), unsafe_allow_html=True)
+        # Changed to 4 decimal places
+        st.markdown(create_metric_card("Avg Stock-Out Hours", f"{avg_stock_hours:.4f}"), unsafe_allow_html=True)
     
     with col3:
         availability_rate = (1 - avg_stock_hours/16) * 100
-        st.markdown(create_metric_card("Availability Rate", f"{availability_rate:.1f}%"), unsafe_allow_html=True)
+        # Changed to 4 decimal places
+        st.markdown(create_metric_card("Availability Rate", f"{availability_rate:.4f}%"), unsafe_allow_html=True)
     
     with col4:
         active_products = len(train_df[train_df['sale_amount'] > 0]['product_id'].unique())
+        # No change: this is an integer count
         st.markdown(create_metric_card("Active Products", f"{active_products:,}"), unsafe_allow_html=True)
     
     # Feature highlights
@@ -171,16 +182,16 @@ if section == "🏠 Dashboard":
             
             with col1:
                 avg_sales = filtered_data['sale_amount'].mean()
-                total_sales_filtered = filtered_data['sale_amount'].sum()
-                st.markdown(create_metric_card("Avg Daily Sales", f"{avg_sales:.2f}"), unsafe_allow_html=True)
+                # Changed to 4 decimal places
+                st.markdown(create_metric_card("Avg Daily Sales", f"{avg_sales:.4f}"), unsafe_allow_html=True)
             
             with col2:
                 stock_severity = filtered_data['stock_hour6_22_cnt'].mean()
                 if stock_severity == 0:
                     severity_label = "Fully Stocked"
-                elif stock_severity <= 5:
+                elif stock_severity <= 5: # Logic remains the same
                     severity_label = "Mild"
-                elif stock_severity <= 10:
+                elif stock_severity <= 10: # Logic remains the same
                     severity_label = "Moderate"
                 else:
                     severity_label = "Severe"
@@ -253,6 +264,7 @@ elif section == "📊 Analytics":
 
         # 🔍 Render Plot with Styling
         if fig:
+            # Matplotlib styling for white elements
             fig.patch.set_facecolor('#262730')
             for ax in fig.get_axes():
                 ax.set_facecolor('#262730')
@@ -272,10 +284,16 @@ elif section == "📊 Analytics":
             metric_cols = st.columns(min(4, len(stats)))
             for i, (key, value) in enumerate(stats.items()):
                 with metric_cols[i % 4]:
-                    st.markdown(create_metric_card(key, str(value)), unsafe_allow_html=True)
+                    # Using the helper function for formatting
+                    st.markdown(create_metric_card(key, format_display_value(value)), unsafe_allow_html=True)
 
         # 📋 Show Table
         if df_result is not None and not df_result.empty:
+            # Round numeric columns in df_result for display
+            for col in df_result.select_dtypes(include=['float64', 'int64']).columns:
+                # Exclude columns that are likely identifiers or dates
+                if col not in ['store_id', 'product_id', 'dt', 'weekday', 'month', 'year']: 
+                    df_result[col] = df_result[col].round(4)
             st.markdown('<h3 class="subsection-header">Data Details</h3>', unsafe_allow_html=True)
             st.dataframe(df_result, use_container_width=True)
         elif not fig:
@@ -303,10 +321,8 @@ elif section == "🔮 Predictions":
     with col2:
         if st.button("🔮 Run Prediction", type="primary"):
             with st.spinner("Running AI predictions..."):
-                # Force refresh
-                pass
-    
-    # st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+                # Force refresh (actual prediction logic is within predict functions)
+                pass 
     
     try:
         fig = None
@@ -321,7 +337,7 @@ elif section == "🔮 Predictions":
             fig, df_result, metrics = predict.predict_stock_severity(eval_df, oos_model, feature_cols, store_id, product_id)
         
         if fig is not None:
-            # Apply custom styling
+            # Apply custom styling for Matplotlib plots
             fig.patch.set_facecolor('#262730')
             for ax in fig.get_axes():
                 ax.set_facecolor('#262730')
@@ -342,20 +358,27 @@ elif section == "🔮 Predictions":
                 metric_cols = st.columns(min(4, len(metrics)))
                 for i, (key, value) in enumerate(metrics.items()):
                     with metric_cols[i % 4]:
+                        display_value = format_display_value(value) # Using the helper function
                         # Color code based on metric type
-                        if "R²" in key and isinstance(value, (int, float)):
+                        color = "normal"
+                        if "R²" in key and isinstance(value, (int, float)): # Ensure 'value' is numeric before comparison
                             color = "positive" if value > 0.7 else "negative" if value < 0.5 else "normal"
-                        else:
-                            color = "normal"
-                        st.markdown(create_metric_card(key, str(value)), unsafe_allow_html=True)
+                        
+                        st.markdown(create_metric_card(key, display_value), unsafe_allow_html=True)
             
             # Prediction results
             if df_result is not None and not df_result.empty:
                 st.markdown('<h3 class="subsection-header">Prediction Results</h3>', unsafe_allow_html=True)
                 
+                # Round numeric columns in df_result for display, excluding specific columns
+                for col in df_result.select_dtypes(include=['float64', 'int64']).columns:
+                    if col not in ['store_id', 'product_id', 'dt', 'Severity', 'True Severity', 'Predicted Severity', 'weekday', 'month', 'year']: 
+                        df_result[col] = df_result[col].round(4)
+
                 # Add severity indicators for classification tasks
-                if "Severity" in df_result.columns:
+                if "Severity" in df_result.columns or "True Severity" in df_result.columns:
                     df_display = df_result.copy()
+                    # Apply status indicators only for columns that hold severity class
                     if 'True Severity' in df_display.columns:
                         df_display['True Severity'] = df_display['True Severity'].apply(
                             lambda x: create_status_indicator({0: "Fully Stocked", 1: "Mild", 2: "Moderate", 3: "Severe"}.get(x, "Unknown"))
@@ -373,7 +396,6 @@ elif section == "🔮 Predictions":
     except Exception as e:
         st.markdown(create_alert(f"Error in prediction: {str(e)}", "error"), unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================
 #        📈 FORECASTING
@@ -388,7 +410,7 @@ elif section == "📈 Forecasting":
     with col2:
         if st.button("📈 Generate Forecast", type="primary"):
             with st.spinner("Generating intelligent forecasts..."):
-                pass
+                pass # The actual forecast generation happens below
     filtered_df = eval_df.copy()
     
     if store_id:
@@ -406,7 +428,7 @@ elif section == "📈 Forecasting":
                 )
                 
                 if fig:
-                    # Apply custom styling
+                    # Apply custom styling for Matplotlib plots
                     fig.patch.set_facecolor('#262730')
                     for ax in fig.get_axes():
                         ax.set_facecolor('#262730')
@@ -428,30 +450,40 @@ elif section == "📈 Forecasting":
                         col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             avg_sales = forecast_df['Predicted Sales'].mean()
-                            st.markdown(create_metric_card("Avg Predicted Sales", f"{avg_sales:.2f}"), unsafe_allow_html=True)
+                            # Changed to 4 decimal places
+                            st.markdown(create_metric_card("Avg Predicted Sales", f"{avg_sales:.4f}"), unsafe_allow_html=True)
                         
                         with col2:
                             avg_stock_out = forecast_df['Predicted Stock-Out Hours (6–22)'].mean()
-                            st.markdown(create_metric_card("Avg Stock-Out Hours", f"{avg_stock_out:.1f}"), unsafe_allow_html=True)
+                            # Changed to 4 decimal places
+                            st.markdown(create_metric_card("Avg Stock-Out Hours", f"{avg_stock_out:.4f}"), unsafe_allow_html=True)
                         
                         with col3:
                             risk_days = len(forecast_df[forecast_df['Predicted Severity Class'] >= 2])
+                            # No change: this is an integer count
                             st.markdown(create_metric_card("High Risk Days", f"{risk_days}/{days}"), unsafe_allow_html=True)
                         
                         with col4:
                             total_revenue = forecast_df['Predicted Sales'].sum()
-                            st.markdown(create_metric_card("Total Forecast Revenue", f"{total_revenue:.2f}"), unsafe_allow_html=True)
+                            # Changed to 4 decimal places
+                            st.markdown(create_metric_card("Total Forecast Revenue", f"{total_revenue:.4f}"), unsafe_allow_html=True)
                         
                         # Detailed forecast table
                         st.markdown('<h3 class="subsection-header">Detailed Forecast</h3>', unsafe_allow_html=True)
                         
+                        # Round numeric columns in forecast_df for display
+                        # Exclude 'Predicted Severity Class' as it's an integer representing a class
+                        for col in forecast_df.select_dtypes(include=['float64', 'int64']).columns:
+                            if col not in ['store_id', 'product_id', 'dt', 'Predicted Severity Class', 'weekday', 'month', 'year']: 
+                                forecast_df[col] = forecast_df[col].round(4)
+
                         # Add severity indicators
                         forecast_display = forecast_df.copy()
                         forecast_display['Severity Label'] = forecast_display['Severity Label'].apply(create_status_indicator)
                         
                         st.markdown(forecast_display.to_html(escape=False), unsafe_allow_html=True)
                         
-                        # Download forecast data
+                        # Download forecast data - the DataFrame is already rounded here
                         csv = forecast_df.to_csv(index=False)
                         st.download_button(
                             label="📥 Download Forecast Data",
@@ -468,8 +500,6 @@ elif section == "📈 Forecasting":
         except Exception as e:
             st.markdown(create_alert(f"Error in forecasting: {str(e)}", "error"), unsafe_allow_html=True)
     
-    st.markdown('</div>', unsafe_allow_html=True)
-
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("""
@@ -479,4 +509,3 @@ st.markdown("""
     <p style="margin-top: 1rem; font-size: 0.75rem; color: #888;">Made by <strong>Yash Maheshwari</strong></p>
 </div>
 """, unsafe_allow_html=True)
-
