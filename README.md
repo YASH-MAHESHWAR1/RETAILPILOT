@@ -2,8 +2,6 @@
 
 ## 🧠 Overview
 
-🔗 **Live Demo**: [Try the App Here](https://huggingface.co/spaces/Yash-M1775/RETAILPILOT)
-
 This is a an ML-powered **Smart Inventory Management** application designed for retail businesses to optimize their inventory using predictive analytics. It supports multi-task predictions including:
 
 - 🧾 **Sales Forecasting**  
@@ -150,6 +148,62 @@ Because of its **large size (~2GB+)**, this project uses **preprocessed Parquet 
   - Interactive sidebar
   - Dynamic component rendering
   - Spinner and error displays for user clarity
+
+---
+
+
+## 🚀 Setup & Deployment
+
+This section helps you get the RETAILPILOT app running on your local machine, and explains how it's hosted online.
+
+### 🖥️ Local Setup Instructions
+
+To run this project locally, follow these steps:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/YASH-MAHESHWAR1/RETAILPILOT.git
+cd RETAILPILOT
+
+# 2. (Optional) Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate     # On Windows use: venv\Scripts\activate
+
+# 3. Install required packages
+pip install -r requirements.txt
+
+# 4. Run the Streamlit app
+streamlit run app.py
+```
+✔️ Make sure:
+- Your `data/` folder contains the preprocessed `.parquet` dataset.
+- You are using Python 3.8 or higher.
+- You have a stable internet connection if external loading is enabled.
+
+
+### 🚀 Deployment
+
+The RETAILPILOT application is deployed using **Hugging Face Spaces** with a **Streamlit** interface.
+
+#### ☁️ Platform Details
+
+Hugging Face Spaces offers an ideal platform for hosting ML apps like RETAILPILOT, especially under resource constraints.
+
+##### ✅ Why Hugging Face Spaces?
+
+- 💾 **Higher RAM allocation** (up to 16 GB) compared to other free-tier platforms
+- 📂 Efficient handling of **large datasets** and **moderately sized models**
+- ⚙️ Built-in support for **Streamlit**, **Gradio**, and **Docker**
+- 🆓 Completely **free-to-deploy**, no credit card required
+- 🔒 Stable and secure for public sharing and collaboration
+
+#### 🌐 Live App
+
+The app is publicly available at:
+
+🔗 **[Launch RETAILPILOT on Hugging Face](https://huggingface.co/spaces/Yash-M1775/RETAILPILOT)**
+
+You can try out all features — sales forecasting, stock prediction, and severity classification — in a fully interactive interface with real data.
 
 ---
 
