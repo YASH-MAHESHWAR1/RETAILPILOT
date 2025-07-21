@@ -30,10 +30,10 @@ def inject_custom_css():
         text-align: center;
         margin-bottom: 2rem;
         /* Optional: comment out gradient if Hugging Face doesn't support text clipping properly */
-        /* background: linear-gradient(135deg, #FF6B35, #2A9D8F); 
+        background: linear-gradient(135deg, #FF6B35, #2A9D8F); 
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text; */
+        background-clip: text; 
     }
     
     
