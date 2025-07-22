@@ -1,14 +1,11 @@
 import streamlit as st
 from utils.load_models import load_model
 from utils.config import feature_cols
-from utils import forecast, predict, visualization
+from utils import forecast, predict, visualization, manual_prediction
 from utils.styling import inject_custom_css, create_metric_card, create_status_indicator, create_alert, create_loading_spinner
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import datetime as dt
+
 
 # --- Helper function for consistent numeric formatting ---
 def format_display_value(value, decimals=4):
@@ -17,6 +14,63 @@ def format_display_value(value, decimals=4):
     if isinstance(value, (int, float)):
         return f"{value:.{decimals}f}"
     return str(value)
+
+
+def create_styled_table(df):
+    """
+    Takes a DataFrame and returns a beautifully styled HTML table string,
+    matching the desired clean aesthetic.
+    """
+    if df.empty:
+        return "" # Return an empty string if there's no data
+
+    # 1. Create the Styler object
+    styler = df.style
+
+    # 2. Hide the index
+    styler.hide(axis="index")
+
+    # 3. Define and apply styles
+    # Apply properties to all data cells (<td>)
+    styler.set_properties(**{
+        'text-align': 'left',
+        'padding': '12px',
+        'font-size': '15px',
+        'background-color': '#262730', # This sets the default cell background
+        'border': 'none', # Remove all borders by default
+    })
+
+    # Apply specific styles to the table and headers (<th>)
+    styler.set_table_styles([
+        # Remove cell spacing
+        {'selector': '', 'props': [('border-collapse', 'collapse')]},
+        
+        # Style for the headers
+        {'selector': 'th',
+         'props': [
+             ('background-color', '#262730'), # Header background
+             ('color', 'white'),              # Header text color
+             ('font-weight', 'bold'),         # Bold header text
+             ('text-align', 'left'),          # Left-align header text
+             ('border-bottom', '2px solid #ff4b4b'), # The key orange/red line
+             ('padding', '12px'),
+         ]},
+        
+        # Style for table rows (to add a faint bottom border for separation)
+        {'selector': 'tr',
+         'props': [
+             ('border-bottom', '1px solid #3a3f4a')
+         ]}
+    ])
+
+    # 4. Render to HTML
+    html_output = styler.to_html(
+        escape=False,
+        table_attributes='style="width:100%;"'
+    )
+
+    return html_output
+
 
 # --- PAGE CONFIG ---
 st.set_page_config(
@@ -50,12 +104,13 @@ else:
     eval_df = st.session_state.eval_df
 
 # Load models with progress indicator
-if "sale_model" not in st.session_state or "stock_model" not in st.session_state or "oos_model" not in st.session_state:
+if "sale_model" not in st.session_state or "stock_model" not in st.session_state or "oos_model" not in st.session_state :
     with st.spinner("Loading ML models..."):
         sale_model, stock_model, oos_model = load_model()
         st.session_state.sale_model = sale_model
         st.session_state.stock_model = stock_model
         st.session_state.oos_model = oos_model
+
 else:
     sale_model = st.session_state.sale_model
     stock_model = st.session_state.stock_model
@@ -71,7 +126,7 @@ with st.sidebar:
     
     section = st.radio(
         "Select Section",
-        ["🏠 Dashboard", "📊 Analytics", "🔮 Predictions", "📈 Forecasting"],
+        ["🏠 Dashboard", "📊 Analytics", "🧪 Model Evaluation", "🔮 Manual Prediction", "📈 Forecasting"], # <-- MODIFIED
         label_visibility="collapsed"
     )
     
@@ -81,14 +136,14 @@ with st.sidebar:
         "🏪 Store ID", 
         options=[None] + store_options, 
         index=0,
-        help="Select a specific store for analysis"
+        help="Select a specific store for analysis or prediction"
     )
     
     product_id = st.selectbox(
         "📦 Product ID", 
         options=[None] + product_options, 
         index=0,
-        help="Select a specific product for analysis"
+        help="Select a specific product for analysis or prediction"
     )
     
     # Data summary
@@ -157,7 +212,7 @@ if section == "🏠 Dashboard":
         <div class="feature-card">
             <div class="feature-icon">🔮</div>
             <h4>Predictive Intelligence</h4>
-            <p>ML-powered predictions for sales, stock-outs, and inventory severity levels</p>
+            <p>Evaluate model performance on test data or run predictions for custom, manually-defined scenarios.</p>
         </div>
         <div class="feature-card">
             <div class="feature-icon">📈</div>
@@ -295,7 +350,21 @@ elif section == "📊 Analytics":
                 if col not in ['store_id', 'product_id', 'dt', 'weekday', 'month', 'year']: 
                     df_result[col] = df_result[col].round(4)
             st.markdown('<h3 class="subsection-header">Data Details</h3>', unsafe_allow_html=True)
-            st.dataframe(df_result, use_container_width=True)
+            styled_html = create_styled_table(df_result)
+
+            # 2. Display it in the scrollable container
+            st.markdown(
+                f"""
+                <div style="max-height: 500px; overflow: auto;">
+                    {styled_html}
+                """, # <-- MISTAKE: f-string ends before the closing div
+                unsafe_allow_html=True
+            )
+            # ...and then a leftover line from a previous edit
+            st.markdown("</div>", unsafe_allow_html=True) # <-- THIS IS THE STRAY TAG
+        elif not fig:
+            st.markdown(create_alert("No data available for the selected filters.", "warning"), unsafe_allow_html=True)
+
         elif not fig:
             st.markdown(create_alert("No data available for the selected filters.", "warning"), unsafe_allow_html=True)
 
@@ -305,21 +374,21 @@ elif section == "📊 Analytics":
 
 
 # ============================
-#       🔮 PREDICTIONS
+#      🔮 Model Evaluation
 # ============================
-elif section == "🔮 Predictions":
-    st.markdown('<h2 class="section-header">AI Predictions & Model Performance</h2>', unsafe_allow_html=True)
+elif section == "🧪 Model Evaluation":
+    st.markdown('<h2 class="section-header">AI Test Predictions & Model Performance</h2>', unsafe_allow_html=True)
     
     # Prediction task selection
     col1, col2 = st.columns([3, 1])
     with col1:
         task = st.selectbox(
-            "Select Prediction Model",
+            "Select Model to Evaluate",
             ["Sales Volume Prediction", "Stock-Out Hours Prediction", "Inventory Severity Classification"]
         )
     
     with col2:
-        if st.button("🔮 Run Prediction", type="primary"):
+        if st.button("🔮 Run Evaluation", type="primary"):
             with st.spinner("Running AI predictions..."):
                 # Force refresh (actual prediction logic is within predict functions)
                 pass 
@@ -394,18 +463,186 @@ elif section == "🔮 Predictions":
                         df_display_for_st_dataframe['True Severity'] = df_display_for_st_dataframe['True Severity'].map(severity_class_to_label).fillna("Unknown")
                     if 'Predicted Severity' in df_display_for_st_dataframe.columns:
                         df_display_for_st_dataframe['Predicted Severity'] = df_display_for_st_dataframe['Predicted Severity'].map(severity_class_to_label).fillna("Unknown")
+                    
+                    styled_html = create_styled_table(df_display_for_st_dataframe)
 
-                    # Display using st.dataframe which handles scrolling
-                    st.dataframe(df_display_for_st_dataframe, use_container_width=True)
+                    # 2. Display it in the scrollable container
+                    st.markdown(
+                        f"""
+                        <div style="max-height: 500px; overflow: auto;">
+                            {styled_html}
+                        """, # <-- MISTAKE: f-string ends before the closing div
+                        unsafe_allow_html=True
+                    )
+                    # ...and then a leftover line from a previous edit
+                    st.markdown("</div>", unsafe_allow_html=True) # <-- THIS IS THE STRAY TAG
+
                 else:
-                    # For other prediction tasks (e.g., sales volume, stock-out hours), use st.dataframe directly
-                    st.dataframe(df_result, use_container_width=True)
+                    styled_html = create_styled_table(df_result)
+
+                    # 2. Display it in the scrollable container
+                    st.markdown(
+                        f"""
+                        <div style="max-height: 500px; overflow: auto;">
+                            {styled_html}
+                        """, # <-- MISTAKE: f-string ends before the closing div
+                        unsafe_allow_html=True
+                    )
+                    # ...and then a leftover line from a previous edit
+                    st.markdown("</div>", unsafe_allow_html=True) # <-- THIS IS THE STRAY TAG
+
         else:
             st.markdown(create_alert("No predictions available for the selected filters.", "warning"), unsafe_allow_html=True)
             
     except Exception as e:
         st.markdown(create_alert(f"Error in prediction: {str(e)}", "error"), unsafe_allow_html=True)
     
+# ============================
+#       🔮 MANUAL PREDICTION
+# ============================
+elif section == "🔮 Manual Prediction":
+    st.markdown('<h2 class="section-header">🔮 Manual Prediction</h2>', unsafe_allow_html=True)
+
+    # Check if the necessary filters are selected in the sidebar
+    if store_id is None or product_id is None:
+        st.warning("👈 Please select a Store ID and a Product ID from the sidebar to run a manual prediction.")
+    else:
+        st.info(f"Running prediction for **Store ID `{store_id}`** and **Product ID `{product_id}`**. Adjust other features below.")
+
+        # --- Pre-fill contextual IDs using the processed dataframe (train_df) ---
+        try:
+            latest_record = train_df[
+                                (train_df['store_id'] == store_id) & 
+                                (train_df['product_id'] == product_id)
+                            ].sort_values('dt', ascending=False).iloc[0] # type: ignore
+
+            
+            # These are the default PROCESSED IDs
+            default_city_id = latest_record['city_id']
+            default_mgmt_group_id = latest_record['management_group_id']
+            default_cat1_id = latest_record['first_category_id']
+            default_cat2_id = latest_record['second_category_id']
+            default_cat3_id = latest_record['third_category_id']
+        except IndexError:
+            # Fallback if the combination doesn't exist, use the first available option
+            default_city_id, default_mgmt_group_id, default_cat1_id, default_cat2_id, default_cat3_id = (0, 0, 0, 0, 0)
+
+        with st.form(key="manual_prediction_form"):
+            # This dictionary will hold all user-provided feature values
+            user_inputs = {}
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("##### 📅 & 📍 Contextual Features")
+                user_inputs['dt'] = st.date_input("Prediction Date", dt.date.today() + dt.timedelta(days=1))
+                
+                # Dropdowns show the processed integer IDs directly
+                id_cols_to_input = ['city_id', 'management_group_id', 'first_category_id', 'second_category_id', 'third_category_id']
+                for col_name in id_cols_to_input:
+                    options = sorted(train_df[col_name].unique())
+                    default_value = locals().get(f"default_{col_name}_id", options[0])
+                    default_index = options.index(default_value) if default_value in options else 0
+                    user_inputs[col_name] = st.selectbox(f"{col_name.replace('_', ' ').title()}", options=options, index=default_index)
+
+            with col2:
+                st.markdown("##### 🎉 & 🌦️ Conditional Features")
+                user_inputs['holiday_flag'] = 1 if st.toggle("Holiday?") else 0
+                user_inputs['activity_flag'] = 1 if st.toggle("Promotion/Activity?") else 0
+                user_inputs['discount'] = st.slider("Discount Rate", 0.0, 1.1, 0.91, 0.01)
+                user_inputs['precpt'] = st.slider("Precipitation (mm)", 0.0, 45.0, 3.7, 0.1)
+                user_inputs['avg_temperature'] = st.slider("Avg Temp (°C)", 10.0, 45.0, 22.3, 0.1)
+                user_inputs['avg_humidity'] = st.slider("Avg Humidity (%)", 25.0, 100.0, 74.5, 0.5)
+                user_inputs['avg_wind_level'] = st.slider("Avg Wind Level", 0.5, 4.0, 1.7, 0.1)
+
+            st.markdown("---")
+            st.markdown("##### 📈 Historical Data (7 Days Prior)")
+            history_sales, history_stock = [], []
+            hist_cols = st.columns(7)
+            for i in range(7):
+                with hist_cols[i]:
+                    st.write(f"T-{7-i}")
+                    sales = st.number_input("Sales", key=f"s_{i}", value=1.0, step=0.1)
+                    stock = st.number_input("Stock-Out", key=f"st_{i}", value=0.0, step=1.0)
+                    history_sales.append(sales); history_stock.append(stock)
+
+            submit_button = st.form_submit_button("🔮 Get Predictions", type="primary")
+
+        if submit_button:
+            with st.spinner("Assembling features and running models..."):
+                try:
+                    # --- ROBUST FEATURE ASSEMBLY ---
+
+                    # 1. Initialize a template DataFrame with the exact required columns from config.py
+                    final_feature_vector = pd.DataFrame(columns=feature_cols, index=[0])
+
+                    # 2. Get historical/time features from the utility function
+                    historical_df = pd.DataFrame({'sale_amount': history_sales, 'stock_hour6_22_cnt': history_stock})
+                    historical_features_part = manual_prediction.create_historical_features(user_inputs['dt'], historical_df)
+                    
+                    # 3. Combine all features into a single dictionary
+                    all_inputs = {
+                        **user_inputs,
+                        **historical_features_part.to_dict('records')[0],
+                        'store_id': store_id,
+                        'product_id': product_id,
+                    }
+                    
+                    # 4. Create the composite 'product_category' feature
+                    all_inputs['product_category'] = (
+                        f"{all_inputs.get('first_category_id', '')}_"
+                        f"{all_inputs.get('second_category_id', '')}_"
+                        f"{all_inputs.get('third_category_id', '')}"
+                    )
+
+                    # 5. Populate the final feature vector, ensuring column order and presence
+                    for col in final_feature_vector.columns:
+                        if col in all_inputs:
+                            final_feature_vector.loc[0, col] = all_inputs[col]
+                    
+                    # 6. Final safety net: Fill any remaining NaNs with 0
+                    final_feature_vector.fillna(0, inplace=True)
+                    
+                    # 7. Convert to appropriate types, just in case
+                    for col in final_feature_vector.columns:
+                        try:
+                            final_feature_vector[col] = pd.to_numeric(final_feature_vector[col], errors='ignore')  # type: ignore
+                        except Exception:
+                            pass
+
+
+                    # 8. Run predictions with the guaranteed-correct feature vector
+                    pred_sales, pred_stock, pred_sev = manual_prediction.run_all_predictions(
+                        final_feature_vector, sale_model, stock_model, oos_model)
+
+                    # --- Display Results ---
+                    st.markdown('<h3 class="subsection-header">Prediction Results</h3>', unsafe_allow_html=True)
+                    r_col1, r_col2, r_col3 = st.columns(3)
+                    r_col1.markdown(create_metric_card("Predicted Sales", format_display_value(pred_sales)), unsafe_allow_html=True)
+                    r_col2.markdown(create_metric_card("Predicted Stock-Out Hours", format_display_value(pred_stock)), unsafe_allow_html=True)
+                    sev_map = {0: "Fully Stocked", 1: "Mild", 2: "Moderate", 3: "Severe"}
+                    r_col3.markdown(f"""<div class="metric-card">
+                        <div class="metric-value">{create_status_indicator(sev_map.get(int(pred_sev), "Unknown"))}</div>
+                        <div class="metric-label">Predicted Severity</div></div>""", unsafe_allow_html=True)
+
+                    with st.expander("Show Final Feature Vector Sent to Models"):
+                        # st.dataframe(final_feature_vector)
+                        styled_html = create_styled_table(final_feature_vector)
+
+                        # 2. Display it in the scrollable container
+                        st.markdown(
+                            f"""
+                            <div style="max-height: 500px; overflow: auto;">
+                                {styled_html}
+                            """, # <-- MISTAKE: f-string ends before the closing div
+                            unsafe_allow_html=True
+                        )
+                        # ...and then a leftover line from a previous edit
+                        st.markdown("</div>", unsafe_allow_html=True) # <-- THIS IS THE STRAY TAG
+                except Exception as e:
+                    st.error(f"An error occurred during prediction: {e}")
+                    import traceback
+                    st.code(traceback.format_exc())
+
 
 # ============================
 #        📈 FORECASTING
@@ -491,7 +728,18 @@ elif section == "📈 Forecasting":
                         forecast_display = forecast_df.copy()
                         forecast_display['Severity Label'] = forecast_display['Severity Label'].apply(create_status_indicator)
                         
-                        st.markdown(forecast_display.to_html(escape=False), unsafe_allow_html=True)
+                        styled_html = create_styled_table(forecast_display)
+
+                        # 2. Display it in the scrollable container
+                        st.markdown(
+                            f"""
+                            <div style="max-height: 500px; overflow: auto;">
+                                {styled_html}
+                            """, # <-- MISTAKE: f-string ends before the closing div
+                            unsafe_allow_html=True
+                        )
+                        # ...and then a leftover line from a previous edit
+                        st.markdown("</div>", unsafe_allow_html=True) # <-- THIS IS THE STRAY TAG
                         
                         # Download forecast data - the DataFrame is already rounded here
                         csv = forecast_df.to_csv(index=False)

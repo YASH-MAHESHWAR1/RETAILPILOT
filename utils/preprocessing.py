@@ -5,8 +5,10 @@ import os
 from pathlib import Path
 from .load_data import load_parquet_data
 from typing import Tuple, Optional
+import joblib
 
 # ========== TRAIN FEATURE ENGINEERING ==========
+
 def prepare_train_features(df):
     df = df.copy()
     df['dt'] = pd.to_datetime(df['dt'])
@@ -16,14 +18,12 @@ def prepare_train_features(df):
 
     df = df.sort_values(['store_id', 'product_id', 'dt'])
 
-    # Time-based features
     df['day_of_week'] = df['dt'].dt.dayofweek
     df['month'] = df['dt'].dt.month
     df['day_of_month'] = df['dt'].dt.day
     df['quarter'] = df['dt'].dt.quarter
     df['is_weekend'] = df['day_of_week'].isin([5, 6]).astype(int)
 
-    # Lag/Moving Average
     for window in [1, 3, 5, 7]:
         df[f'sales_lag_{window}'] = df.groupby(['store_id', 'product_id'])['sale_amount'].shift(window)
         df[f'stock_lag_{window}'] = df.groupby(['store_id', 'product_id'])['stock_hour6_22_cnt'].shift(window)
@@ -37,10 +37,13 @@ def prepare_train_features(df):
             df.groupby(['store_id', 'product_id'])['stock_hour6_22_cnt']
             .transform(lambda x: x.shift(1).rolling(window, min_periods=1).mean())
         )
-    # Label encoding
+
+    # Save LabelEncoders with joblib
     for col in ['city_id', 'store_id', 'management_group_id',
                 'first_category_id', 'second_category_id', 'third_category_id', 'product_id']:
-        df[col] = LabelEncoder().fit_transform(df[col])
+        encoder = LabelEncoder()
+        df[col] = encoder.fit_transform(df[col])
+        joblib.dump(encoder, f"model/{col}_encoder.pkl")
 
     df['product_category'] = (
         df['first_category_id'].astype(str) + '_' +
@@ -48,7 +51,6 @@ def prepare_train_features(df):
         df['third_category_id'].astype(str)
     )
 
-    # Drop missing values in essential columns
     required_cols = ['sale_amount', 'stock_hour6_22_cnt'] + [col for col in df.columns if 'lag' in col or 'ma' in col]
     df = df.dropna(subset=required_cols)
 
@@ -56,6 +58,7 @@ def prepare_train_features(df):
 
 
 # ========== TEST FEATURE ENGINEERING ==========
+
 def prepare_test_features(test_df, train_df):
     test_df = test_df.copy()
     test_df['dt'] = pd.to_datetime(test_df['dt'])
@@ -65,18 +68,21 @@ def prepare_test_features(test_df, train_df):
 
     test_df = test_df.sort_values(['store_id', 'product_id', 'dt'])
 
-    # Time features
     test_df['day_of_week'] = test_df['dt'].dt.dayofweek
     test_df['month'] = test_df['dt'].dt.month
     test_df['day_of_month'] = test_df['dt'].dt.day
     test_df['quarter'] = test_df['dt'].dt.quarter
     test_df['is_weekend'] = test_df['day_of_week'].isin([5, 6]).astype(int)
 
-    # Label encoding using train mappings
+    # Load LabelEncoders with joblib
     for col in ['city_id', 'store_id', 'management_group_id',
                 'first_category_id', 'second_category_id', 'third_category_id', 'product_id']:
-        label_map = {val: idx for idx, val in enumerate(sorted(train_df[col].unique()))}
-        test_df[col] = test_df[col].map(label_map).fillna(-1).astype(int)
+        encoder_path = f"model/{col}_encoder.pkl"
+        if os.path.exists(encoder_path):
+            encoder = joblib.load(encoder_path)
+            test_df[col] = test_df[col].map(lambda x: encoder.transform([x])[0] if x in encoder.classes_ else -1)
+        else:
+            test_df[col] = -1
 
     test_df['product_category'] = (
         test_df['first_category_id'].astype(str) + '_' +
@@ -84,7 +90,6 @@ def prepare_test_features(test_df, train_df):
         test_df['third_category_id'].astype(str)
     )
 
-    # Merge last 7 days of train with test for lag/ma
     test_df["__is_test__"] = True
     tail_df = train_df[train_df['dt'] >= (train_df['dt'].max() - pd.Timedelta(days=7))].copy()
     tail_df["__is_test__"] = False

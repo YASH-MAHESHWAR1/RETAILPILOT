@@ -5,7 +5,5 @@ xgboost
 lightgbm
 matplotlib
 seaborn
-plotly
 streamlit
-pyarrow
 joblib

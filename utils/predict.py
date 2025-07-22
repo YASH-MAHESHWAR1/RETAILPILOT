@@ -74,6 +74,8 @@ def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_
         df['error'] = y_true - y_pred
         df['abs_error'] = abs(df['error'])
 
+
+        
         #  Plot (first 100 for clarity)
         fig, ax = plt.subplots(figsize=(12, 5))
         sample = df.head(100)
@@ -86,10 +88,22 @@ def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_
         ax.grid(True, linestyle='--', alpha=0.6)
         fig.tight_layout()
 
-        return fig, df[['dt', 'store_id', 'product_id', target_col, f'predicted_{target_col}', 'error', 'abs_error']], metrics
+        column_rename_map = {
+            'dt': 'Date',
+            'store_id': 'Store ID',
+            'product_id': 'Product ID',
+            'sale_amount': 'Actual Sales',
+            'predicted_sale_amount': 'Predicted Sales',
+            'error': 'Error',
+            'abs_error': 'Absolute Error'
+        }
+        df = df.rename(columns=column_rename_map)
+
+        return fig, df[['Date', 'Store ID', 'Product ID', 'Actual Sales', 'Predicted Sales', 'Error', 'Absolute Error']], metrics
 
     except Exception as e:
         return None, None, {"❌ Error": str(e)}
+
 
 
 # ------------------------------------
