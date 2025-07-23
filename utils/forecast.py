@@ -22,7 +22,6 @@ def forecast_sales_stock_oos(
     """
     Forecasts sales, stock-out hours (6–22), and severity for a given store-product combo,
     or overall if not specified.
-
     Parameters:
     - sale_model: trained regression model for sales
     - stock_model: trained regression model for stock-out hours
@@ -32,7 +31,6 @@ def forecast_sales_stock_oos(
     - days: number of days to forecast
     - store_id: (optional) specific store to forecast
     - product_id: (optional) specific product to forecast
-
     Returns:
     - forecast_df: DataFrame with predicted results
     - fig: matplotlib figure of forecasted trends
@@ -124,19 +122,19 @@ def forecast_sales_stock_oos(
         forecast_df = pd.DataFrame(forecasts)
 
         # ========== 📊 Plot ==========
-        fig, ax1 = plt.subplots(figsize=(12, 5))
+        fig, ax1 = plt.subplots(figsize=(8, 3))
         ax2 = ax1.twinx()
 
         sns.lineplot(data=forecast_df, x='Date', y='Predicted Sales', marker='o', ax=ax1, color="#1f77b4", label="Sales")
         sns.lineplot(data=forecast_df, x='Date', y='Predicted Stock-Out Hours (6–22)', marker='s', ax=ax1, color="#2ca02c", label="Stock-Out Hours")
         sns.lineplot(data=forecast_df, x='Date', y='Predicted Severity Class', marker='^', ax=ax2, color="#d62728", label="Severity Level")
 
-        ax1.set_ylabel("Sales / Stock-Out Hours", fontsize=12)
-        ax2.set_ylabel("Severity Class", fontsize=12, color="#d62728")
-        ax1.set_xlabel("Forecast Date", fontsize=12)
+        ax1.set_ylabel("Sales / Stock-Out Hours", fontsize=10)
+        ax2.set_ylabel("Severity Class", fontsize=10, color="#d62728")
+        ax1.set_xlabel("Forecast Date", fontsize=10)
         ax1.set_title("🔮 Forecast: Sales, Stock-Out Hours (6–22), and Severity Level", fontsize=14, weight='bold')
         ax1.grid(True, linestyle='--', linewidth=0.5, alpha=0.7)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         return forecast_df, fig
 
