@@ -23,7 +23,6 @@ warnings.filterwarnings("ignore")
 def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_id=None, product_id=None):
     """
     Predicts sales on filtered test data and returns plot, metrics, and a result table.
-
     Parameters:
     - model: trained regression model
     - test_df (pd.DataFrame): test dataset
@@ -31,7 +30,6 @@ def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_
     - target_col (str): prediction target column
     - store_id (int, optional): filter to specific store
     - product_id (int, optional): filter to specific product
-
     Returns:
     - fig (plt.Figure): matplotlib figure
     - result_df (pd.DataFrame): prediction + error table
@@ -77,11 +75,11 @@ def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_
 
         
         #  Plot (first 100 for clarity)
-        fig, ax = plt.subplots(figsize=(12, 5))
+        fig, ax = plt.subplots(figsize=(10, 5))
         sample = df.head(100)
         ax.plot(sample[target_col].values, marker='o', label="True", color='#264653')
         ax.plot(sample['predicted_' + target_col].values, marker='x', label="Predicted", color='#e76f51')
-        ax.set_title(f"🔍 {target_col} - True vs Predicted ({metrics['📍 Scope']})", fontsize=14, weight='bold')
+        ax.set_title(f"{target_col} - True vs Predicted ({metrics['Scope']})", fontsize=14, weight='bold')
         ax.set_xlabel("Sample Index")
         ax.set_ylabel(target_col.replace("_", " ").title())
         ax.legend()
@@ -118,14 +116,12 @@ def predict_stockout_hours(
 ) -> Tuple[Optional[Figure], pd.DataFrame, Dict]:
     """
     Predict number of out-of-stock hours (6am–10pm) and return plot, table, and metrics.
-
     Parameters:
     - df (pd.DataFrame): Input dataframe
     - model: Trained regression model
     - feature_cols (list): Feature columns for prediction
     - store_id (int, optional): Filter by store_id
     - product_id (int, optional): Filter by product_id
-
     Returns:
     - fig: Matplotlib figure showing actual vs predicted out-of-stock hours
     - result_df: DataFrame with actual, predicted, and error
@@ -147,7 +143,7 @@ def predict_stockout_hours(
             print("⚠️ No data available for the selected filters.")
             return None, pd.DataFrame(), {}
 
-        title = " | ".join(["⛔ Predicted Out-of-Stock Hours"] + title_parts)
+        title = " | ".join(["Predicted Out-of-Stock Hours"] + title_parts)
 
         X = df[feature_cols]
         y_true = df["stock_hour6_22_cnt"]
@@ -177,7 +173,7 @@ def predict_stockout_hours(
         result_df = result_df.sort_values("Date")
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 5))
+        fig, ax = plt.subplots(figsize=(10, 5))
         sns.lineplot(data=result_df[:100], x="Date", y="Actual Out-of-Stock Hours",
                      label="Actual", marker='o', color="#e76f51", ax=ax)
         sns.lineplot(data=result_df[:100], x="Date", y="Predicted Out-of-Stock Hours",
@@ -237,7 +233,7 @@ def predict_stock_severity(df: pd.DataFrame, model, feature_cols: list, store_id
             print("⚠️ No data after filtering.")
             return None, None, None
 
-        title = " | ".join(["📦 Stock Severity Prediction"] + title_parts)
+        title = " | ".join(["Stock Severity Prediction"] + title_parts)
         # Prepare target
         df['stock_hour6_22_cnt'] = df['stock_hour6_22_cnt'].fillna(0).clip(lower=0, upper=16).astype(int)
         df['severity'] = df['stock_hour6_22_cnt'].apply(bin_stock_severity)
@@ -271,7 +267,7 @@ def predict_stock_severity(df: pd.DataFrame, model, feature_cols: list, store_id
         result_df.rename(columns={'dt': 'Date'}, inplace=True)
 
         # === Plots ===
-        fig, axs = plt.subplots(1, 2, figsize=(14, 5))
+        fig, axs = plt.subplots(1, 2, figsize=(12, 5))
 
         # ROC Curve (if supported)
         if y_proba.shape[1] == len(y_classes):
