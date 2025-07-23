@@ -320,6 +320,7 @@ elif section == "📊 Analytics":
         # 🔍 Render Plot with Styling
         if fig:
             # Matplotlib styling for white elements
+            fig.set_size_inches(9, 3)
             fig.patch.set_facecolor('#262730')
             for ax in fig.get_axes():
                 ax.set_facecolor('#262730')
@@ -331,7 +332,7 @@ elif section == "📊 Analytics":
                 ax.spines['top'].set_color('white')
                 ax.spines['right'].set_color('white')
                 ax.spines['left'].set_color('white')
-            st.pyplot(fig)
+            st.pyplot(fig, use_container_width=False)
 
         # 📊 Show Key Metrics
         if stats:
@@ -407,6 +408,7 @@ elif section == "🧪 Model Evaluation":
         
         if fig is not None:
             # Apply custom styling for Matplotlib plots
+            fig.set_size_inches(9, 3)
             fig.patch.set_facecolor('#262730')
             for ax in fig.get_axes():
                 ax.set_facecolor('#262730')
@@ -419,7 +421,7 @@ elif section == "🧪 Model Evaluation":
                 ax.spines['right'].set_color('white')
                 ax.spines['left'].set_color('white')
             
-            st.pyplot(fig)
+            st.pyplot(fig, use_container_width=False)
             
             # Model performance metrics
             if metrics:
@@ -507,7 +509,7 @@ elif section == "🔮 Manual Prediction":
     if store_id is None or product_id is None:
         st.warning("👈 Please select a Store ID and a Product ID from the sidebar to run a manual prediction.")
     else:
-        st.info(f"Running prediction for **Store ID `{store_id}`** and **Product ID `{product_id}`**. Adjust other features below.")
+        st.info(f"Running prediction for **Store ID {store_id}** and **Product ID {product_id}**. Adjust other features below.")
 
         # --- Pre-fill contextual IDs using the processed dataframe (train_df) ---
         try:
@@ -676,6 +678,7 @@ elif section == "📈 Forecasting":
                 
                 if fig:
                     # Apply custom styling for Matplotlib plots
+                    fig.set_size_inches(9, 3)
                     fig.patch.set_facecolor('#262730')
                     for ax in fig.get_axes():
                         ax.set_facecolor('#262730')
@@ -688,7 +691,7 @@ elif section == "📈 Forecasting":
                         ax.spines['right'].set_color('white')
                         ax.spines['left'].set_color('white')
                     
-                    st.pyplot(fig)
+                    st.pyplot(fig, use_container_width=False)
                     
                     # Forecast summary metrics
                     if not forecast_df.empty:
