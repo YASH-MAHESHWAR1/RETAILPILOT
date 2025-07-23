@@ -79,7 +79,7 @@ def predict_sales(model, test_df, feature_cols, target_col='sale_amount', store_
         sample = df.head(100)
         ax.plot(sample[target_col].values, marker='o', label="True", color='#264653')
         ax.plot(sample['predicted_' + target_col].values, marker='x', label="Predicted", color='#e76f51')
-        ax.set_title(f"{target_col} - True vs Predicted ({metrics['Scope']})", fontsize=14, weight='bold')
+        ax.set_title(f"{target_col} - True vs Predicted ({metrics['📍 Scope']})", fontsize=14, weight='bold')
         ax.set_xlabel("Sample Index")
         ax.set_ylabel(target_col.replace("_", " ").title())
         ax.legend()
