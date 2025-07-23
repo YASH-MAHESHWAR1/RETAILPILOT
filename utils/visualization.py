@@ -38,7 +38,7 @@ def plot_sales_volume_trend(df, store_id=None, product_id=None, freq='D'):
             return None, None, None
 
         label = {'D': 'Daily', 'W': 'Weekly', 'M': 'Monthly'}.get(freq.upper(), 'Daily')
-        title = f"📦 {label} Sales Volume Trend"
+        title = f"{label} Sales Volume Trend"
         if store_id is not None:
             title += f" | Store {store_id}"
         if product_id is not None:
@@ -57,14 +57,15 @@ def plot_sales_volume_trend(df, store_id=None, product_id=None, freq='D'):
         }
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 5))
-        sns.lineplot(data=agg_df, x='dt', y='stock_hour6_22_cnt', marker='o', linewidth=2.5, color='#e76f51', ax=ax)
-        ax.set_title(title, fontsize=16, weight='bold')
-        ax.set_xlabel("Date", fontsize=12)
-        ax.set_ylabel("Sales Volume", fontsize=12)
+        fig, ax = plt.subplots(figsize=(9, 3))
+        sns.lineplot(data=agg_df, x='dt', y='stock_hour6_22_cnt', marker='o', linewidth=1.5, color='#e76f51', ax=ax)
+        ax.set_title(title, fontsize=13, weight='bold')
+        ax.set_xlabel("Date", fontsize=10)
+        ax.set_ylabel("Sales Volume", fontsize=10)
         ax.grid(True, linestyle='--', alpha=0.6)
-        ax.tick_params(axis='x', rotation=45)
-        fig.tight_layout()
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
+        # fig.tight_layout()
 
         display_df = agg_df.rename(columns={'dt': 'Date', 'stock_hour6_22_cnt': 'Total Sales Volume'})
 
@@ -107,7 +108,7 @@ def plot_sales_trend(df, store_id=None, product_id=None, freq='D'):
             return None, None, None
 
         label = {'D': 'Daily', 'W': 'Weekly', 'M': 'Monthly'}.get(freq.upper(), 'Daily')
-        title = f"📈 {label} Sales Amount Trend"
+        title = f"{label} Sales Amount Trend"
         if store_id is not None:
             title += f" | Store {store_id}"
         if product_id is not None:
@@ -126,14 +127,15 @@ def plot_sales_trend(df, store_id=None, product_id=None, freq='D'):
         }
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 5))
-        sns.lineplot(data=agg_df, x='dt', y='sale_amount', marker='o', linewidth=2.5, color='#2a9d8f', ax=ax)
-        ax.set_title(title, fontsize=16, weight='bold')
-        ax.set_xlabel("Date", fontsize=12)
-        ax.set_ylabel("Sales Amount", fontsize=12)
+        fig, ax = plt.subplots(figsize=(9, 3))
+        sns.lineplot(data=agg_df, x='dt', y='sale_amount', marker='o', linewidth=1.5, color='#2a9d8f', ax=ax)
+        ax.set_title(title, fontsize=13, weight='bold')
+        ax.set_xlabel("Date", fontsize=10)
+        ax.set_ylabel("Sales Amount", fontsize=10)
         ax.grid(True, linestyle='--', alpha=0.6)
-        ax.tick_params(axis='x', rotation=45)
-        fig.tight_layout()
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
+        # fig.tight_layout()
 
         display_df = agg_df.rename(columns={'dt': 'Date', 'sale_amount': 'Total Sale Amount'})
 
@@ -167,9 +169,9 @@ def get_top_products_by_sales(df, top_n=10, store_id=None):
     try:
         if store_id is not None:
             df = df[df['store_id'] == store_id]
-            title = f"🏪 Top {top_n} Products in Store {store_id}"
+            title = f"Top {top_n} Products in Store {store_id}"
         else:
-            title = f"🏬 Top {top_n} Products Overall"
+            title = f"Top {top_n} Products Overall"
 
         if df.empty:
             print("⚠️ No data found for the selected filters.")
@@ -185,7 +187,7 @@ def get_top_products_by_sales(df, top_n=10, store_id=None):
         )
 
         # --- Plot
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.barplot(
             data=top_products,
             x='product_id',
@@ -193,12 +195,13 @@ def get_top_products_by_sales(df, top_n=10, store_id=None):
             palette='viridis',
             ax=ax
         )
-        ax.set_title(title, fontsize=16, fontweight='bold')
-        ax.set_xlabel("Product ID", fontsize=12)
-        ax.set_ylabel("Total Sale Amount", fontsize=12)
-        ax.tick_params(axis='x', rotation=45)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel("Product ID", fontsize=10)
+        ax.set_ylabel("Total Sale Amount", fontsize=10)
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         # --- Summary Stats
         stats = {
@@ -241,9 +244,9 @@ def get_top_stores_by_sales(df, top_n=10, product_id=None):
         # Filter by product_id if provided
         if product_id is not None:
             df = df[df['product_id'] == product_id]
-            title = f"🏪 Top {top_n} Stores for Product {product_id}"
+            title = f"Top {top_n} Stores for Product {product_id}"
         else:
-            title = f"🏬 Top {top_n} Stores Overall"
+            title = f"Top {top_n} Stores Overall"
 
         if df.empty:
             print("⚠️ No data found for the selected filters.")
@@ -259,7 +262,7 @@ def get_top_stores_by_sales(df, top_n=10, product_id=None):
         )
 
         # --- Plot
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.barplot(
             data=top_stores,
             x='store_id',
@@ -267,12 +270,13 @@ def get_top_stores_by_sales(df, top_n=10, product_id=None):
             palette='crest',
             ax=ax
         )
-        ax.set_title(title, fontsize=16, fontweight='bold')
-        ax.set_xlabel("Store ID", fontsize=12)
-        ax.set_ylabel("Total Sale Amount", fontsize=12)
-        ax.tick_params(axis='x', rotation=45)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel("Store ID", fontsize=10)
+        ax.set_ylabel("Total Sale Amount", fontsize=10)
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
         ax.grid(axis='y', linestyle='--', alpha=0.7)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         # --- Summary stats
         stats = {
@@ -321,7 +325,7 @@ def plot_discount_vs_sales(df, store_id=None, product_id=None):
         if df.empty or 'discount' not in df.columns or 'sale_amount' not in df.columns:
             return None, None, None
 
-        title = "🔻 Discount vs 💰 Sale Amount"
+        title = "🔻 Discount vs  Sale Amount"
         if store_id is not None:
             title += f" | Store {store_id}"
         if product_id is not None:
@@ -332,14 +336,15 @@ def plot_discount_vs_sales(df, store_id=None, product_id=None):
         df = df[df['sale_amount'] < df['sale_amount'].quantile(0.99)]  # Remove top 1% outliers
 
         # Plot
-        fig, ax = plt.subplots(figsize=(8, 5))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.scatterplot(data=df, x='discount', y='sale_amount', alpha=0.5, s=40, color="#277da1", ax=ax)
         sns.regplot(data=df, x='discount', y='sale_amount', scatter=False, color='red', ax=ax)
-        ax.set_title(title, fontsize=15, fontweight='bold')
-        ax.set_xlabel("Discount", fontsize=12)
-        ax.set_ylabel("Sale Amount", fontsize=12)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel("Discount", fontsize=10)
+        ax.set_ylabel("Sale Amount", fontsize=10)
+        ax.tick_params(axis='both', labelsize=7)
         ax.grid(True, linestyle='--', alpha=0.6)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         # Table Data
         display_df = df[['discount', 'sale_amount']].copy()
@@ -401,22 +406,23 @@ def plot_weather_vs_sales(
         df = df.dropna(subset=[weather_feature, 'sale_amount'])
         df = df[df['sale_amount'] < df['sale_amount'].quantile(0.99)]
 
-        title = f"🌤️ {weather_feature.replace('_', ' ').title()} vs 💰 Sales"
+        title = f"{weather_feature.replace('_', ' ').title()} vs Sales"
         if store_id is not None:
             title += f" | Store {store_id}"
         if product_id is not None:
             title += f" | Product {product_id}"
 
         # Plot
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.scatterplot(data=df, x=weather_feature, y='sale_amount', alpha=0.6, s=30, color="#2a9d8f", ax=ax)
         sns.regplot(data=df, x=weather_feature, y='sale_amount', scatter=False, color='#FF6B35', ax=ax)
         
-        ax.set_title(title, fontsize=15, fontweight='bold')
-        ax.set_xlabel(weather_feature.replace('_', ' ').title(), fontsize=12)
-        ax.set_ylabel("Sale Amount", fontsize=12)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel(weather_feature.replace('_', ' ').title(), fontsize=10)
+        ax.set_ylabel("Sale Amount", fontsize=10)
+        ax.tick_params(axis='both', labelsize=7)
         ax.grid(True, linestyle='--', alpha=0.6)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         # Display data
         display_df = df[[weather_feature, 'sale_amount']].copy()
@@ -472,21 +478,22 @@ def plot_holiday_vs_sales(df, store_id=None, product_id=None):
         df = df[df['sale_amount'] < df['sale_amount'].quantile(0.99)]
         df['Holiday'] = df['holiday_flag'].map({0: 'Non-Holiday', 1: 'Holiday'})
 
-        title = "🎉 Holiday Impact on Sales"
+        title = "Holiday Impact on Sales"
         if store_id is not None:
             title += f" | Store {store_id}"
         if product_id is not None:
             title += f" | Product {product_id}"
 
         # Plot
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.boxplot(data=df, x='Holiday', y='sale_amount', palette=['#2a9d8f', '#FF6B35'], ax=ax)
         
-        ax.set_title(title, fontsize=15, fontweight='bold')
-        ax.set_xlabel("Day Type", fontsize=12)
-        ax.set_ylabel("Sale Amount", fontsize=12)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel("Day Type", fontsize=10)
+        ax.set_ylabel("Sale Amount", fontsize=10)
+        ax.tick_params(axis='both', labelsize=7)
         ax.grid(True, linestyle='--', alpha=0.6)
-        fig.tight_layout()
+        # fig.tight_layout()
 
         # Aggregate data
         holiday_summary = df.groupby('Holiday')['sale_amount'].agg([
@@ -551,7 +558,7 @@ def plot_out_of_stock_trend(df: pd.DataFrame, store_id: Optional[int] = None,
             print("⚠️ No data after filtering.")
             return None, pd.DataFrame(), {}
 
-        title = " | ".join(["📉 Out-of-Stock Severity Trend"] + title_parts)
+        title = " | ".join(["Out-of-Stock Severity Trend"] + title_parts)
 
         # Resample
         df.set_index('dt', inplace=True)
@@ -572,21 +579,22 @@ def plot_out_of_stock_trend(df: pd.DataFrame, store_id: Optional[int] = None,
             stock_status = "🔴 Frequently Out of Stock"
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.lineplot(data=grouped, x='dt', y='stock_hour6_22_cnt', marker='o',
-                     linewidth=2.5, color='#e76f51', ax=ax)
+                     linewidth=2, color='#e76f51', ax=ax)
         ax.set_title(title + f" ({'Daily' if freq=='D' else 'Weekly' if freq=='W' else 'Monthly'})",
-                     fontsize=16, fontweight='bold')
-        ax.set_ylabel("Avg Out-of-Stock Hours (6AM–10PM)", fontsize=12)
-        ax.set_xlabel("Date", fontsize=12)
+                     fontsize=13, fontweight='bold')
+        ax.set_ylabel("Avg Out-of-Stock Hours (6AM–10PM)", fontsize=10)
+        ax.set_xlabel("Date", fontsize=10)
         ax.grid(True, linestyle='--', alpha=0.6)
-        ax.tick_params(axis='x', rotation=45)
-        fig.tight_layout()
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
+        # fig.tight_layout()
 
         # Rename for table view
         display_df = grouped.rename(columns={
             "dt": "Date",
-            "stock_hour6_22_cnt": "Avg OOS Hours",
+            "stock_hour6_22_cnt": "Avg OOS Hurs",
             "stocked_ratio": "Stocked % (Inverse of OOS)"
         })
 
@@ -628,9 +636,9 @@ def top_out_of_stock_products(df: pd.DataFrame, top_n: int = 10,
 
         if store_id is not None:
             df = df[df['store_id'] == store_id]
-            title = f"🏬 Top {top_n} Out-of-Stock Products in Store {store_id}"
+            title = f"Top {top_n} Out-of-Stock Products in Store {store_id}"
         else:
-            title = f"🏭 Top {top_n} Out-of-Stock Products Overall"
+            title = f"Top {top_n} Out-of-Stock Products Overall"
 
         if df.empty:
             print("⚠️ No data available.")
@@ -645,14 +653,15 @@ def top_out_of_stock_products(df: pd.DataFrame, top_n: int = 10,
         )
 
         # Plot
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig, ax = plt.subplots(figsize=(9, 3))
         sns.barplot(data=grouped, x='product_id', y='stock_hour6_22_cnt', palette='flare', ax=ax)
-        ax.set_title(title, fontsize=16, fontweight='bold')
-        ax.set_xlabel("Product ID", fontsize=12)
-        ax.set_ylabel("Total Out-of-Stock Hours", fontsize=12)
+        ax.set_title(title, fontsize=13, fontweight='bold')
+        ax.set_xlabel("Product ID", fontsize=10)
+        ax.set_ylabel("Total Out-of-Stock Hours", fontsize=10)
         ax.grid(axis='y', linestyle='--', alpha=0.6)
-        ax.tick_params(axis='x', rotation=45)
-        fig.tight_layout()
+        ax.tick_params(axis='both', labelsize=7)
+        ax.tick_params(axis='x', rotation=0)
+        # fig.tight_layout()
 
        # Rename for display
         display_df = grouped.rename(columns={
