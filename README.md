@@ -190,6 +190,7 @@ The app is publicly available at:
 🔗 **[Launch RETAILPILOT on Hugging Face](https://huggingface.co/spaces/Yash-M1775/RETAILPILOT)**
 
 You can try out all features — sales forecasting, stock prediction, and severity classification — in a fully interactive interface with real data.
+Along with that you can also get the deployed code in the files section of this
 
 ---
 
