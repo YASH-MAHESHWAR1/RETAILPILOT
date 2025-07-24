@@ -103,6 +103,7 @@ def forecast_sales_stock_oos(
             input_data = row[feature_cols].values.reshape(1, -1)
             predicted_sales = sale_model.predict(input_data)[0]
             predicted_stock = stock_model.predict(input_data)[0]
+            predicted_stock = np.round(predicted_stock).astype(int)
             predicted_severity = severity_model.predict(input_data)[0]
             severity_label = map_severity_class(predicted_severity)
 
